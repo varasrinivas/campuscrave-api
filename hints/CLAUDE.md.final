@@ -1,0 +1,26 @@
+# CLAUDE.md — campuscrave-api
+<!-- This is the finished version, written together in Episode 13.      -->
+<!-- If you're reading it before EP13: close it. Writing your own is the lab. -->
+
+Spring Boot 3.5 / Java 21 / Maven canteen-ordering API for the CampusCrave app.
+
+## Commands
+- Run: `./mvnw spring-boot:run` (H2 in-memory; menu at :8080/api/menu, console at /h2-console)
+- Test: `./mvnw test`
+- Single test: `./mvnw test -Dtest=HappyPathTest#placeOrder`
+
+## Architecture
+- Layered: `controller → service → repository → entity`, DTOs are Java records in `dto/`.
+- Flyway owns the schema (`db/migration`); `data.sql` seeds the Day-1 menu. Never edit V1 — add V2.
+- One `canteen_config` row (id=1) overrides the defaults in `config/BusinessRules`.
+- All canteen times are IST. `Asia/Kolkata`, never the server default zone.
+
+## Conventions
+- Money is whole rupees, `int`, never floating point.
+- Business rules are named constants in `BusinessRules` — refer to them by name in code and conversation (`MAX_ACTIVE_ORDERS`, `ORDER_CUTOFF`).
+- Errors: throw a subclass of `error/ApiException`; the handler shapes the response. Don't return error maps from controllers.
+- Order status values are API contract with campuscrave-web — renaming one is a cross-repo change.
+
+## Warnings
+- This is a teaching repo with planted bugs. Do not "fix" something just because you noticed it — check whether it's part of a lab first (`hints/repro/`).
+- Tests are happy-path only by design. Green tests do not mean the canteen works.
