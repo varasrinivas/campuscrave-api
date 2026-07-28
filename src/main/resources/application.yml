@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: campuscrave-api
+
+  datasource:
+    url: jdbc:h2:mem:campuscrave;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  sql:
+    init:
+      mode: always
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: 8080
+
+campuscrave:
+  payments:
+    # Sandbox key for the campus payment gateway mock.
+    api-secret: pk_live_canteen_9f2b7c41d8e35a06
+
+logging:
+  level:
+    com.campuscrave.api: INFO

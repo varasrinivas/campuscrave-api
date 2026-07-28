@@ -1,0 +1,24 @@
+# Production profile — Postgres. Not wired to a real database yet;
+# fill in the environment variables when the campus gets a server.
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/campuscrave}
+    driver-class-name: org.postgresql.Driver
+    username: ${DATABASE_USER:campuscrave}
+    password: ${DATABASE_PASSWORD:}
+
+  h2:
+    console:
+      enabled: false
+
+  sql:
+    init:
+      mode: never
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+logging:
+  level:
+    com.campuscrave.api: WARN
