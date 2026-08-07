@@ -1,11 +1,38 @@
 #!/usr/bin/env bash
 # BUG-01 — the Biryani Bug.
-# Three orders hit the same dish in the same second. Wednesday special,
-# Rs.90, stock 3. Watch the API logs while this runs.
+# Several orders hit the same dish in the same instant. Wednesday special,
+# Rs.90. Watch the API logs while this runs.
 #
 # Usage: ./BUG-01.sh   (API must be running on localhost:8080)
+#
+# RUN THIS FIRST, right after the API starts. That matters more than it
+# sounds: a freshly started server is still slow on its first few requests,
+# so all of these arrive while it is still thinking about the first one.
+# Once the server has warmed up it answers each request too fast for them
+# to overlap, and the shelf comes out at a tidy zero with nothing to see.
+# If you get a boring result, restart the API and run this again.
+#
+# Safe to run as many times as you like: it puts the biryani back on the
+# shelf, tops the wallets up and clears the order slots first.
 
-API=http://localhost:8080/api/orders
+BASE=http://localhost:8080
+API=$BASE/api/orders
+RACERS=8
+
+# Put three portions back and make sure everyone can pay, so this is
+# repeatable. Without this, run two fails for reasons that have nothing
+# to do with the bug you came here to see.
+curl -s -o /dev/null -X PUT "$BASE/api/admin/dishes/1/stock" \
+  -H 'Content-Type: application/json' -d '{"stock":3}'
+for s in 1 2 3; do
+  curl -s -o /dev/null -X POST "$BASE/api/wallet/$s/topup" \
+    -H 'Content-Type: application/json' -d '{"amountRupees":1000}'
+  # Free up their order slots too — three in flight is the limit.
+  for id in $(curl -s "$BASE/api/orders?studentId=$s" \
+                | grep -oE '"orderId":[0-9]+' | grep -oE '[0-9]+'); do
+    curl -s -o /dev/null -X POST "$BASE/api/orders/$id/cancel"
+  done
+done
 
 order() {
   curl -s -o /dev/null -w "student $1 -> HTTP %{http_code}\n" "$API" \
@@ -18,18 +45,20 @@ order() {
     }'
 }
 
-echo "12:31 PM. Three hungry students. Three biryanis. Stock: 3."
-echo "All three orders leave at the same moment..."
+echo "12:31 PM. Three biryanis on the shelf."
+echo "$RACERS students tap ADD in the same second..."
 echo
 
-# The & is the whole experiment: all three requests are in flight at once.
-order 1 &
-order 2 &
-order 3 &
+# The & is the whole experiment: every request is in flight at once.
+# More racers than portions is the point — that is what a lunch rush is.
+for i in $(seq 1 $RACERS); do
+  order $(( (i % 3) + 1 )) &
+done
 wait
 
 echo
 echo "Now check the shelf:"
-curl -s http://localhost:8080/api/menu/1 | grep -o '"stock":[^,]*'
-echo "Run me a few times in a row. When the number above goes negative,"
-echo "place one more order for dish 1 and watch what the API returns."
+curl -s "$BASE/api/menu/1" | grep -o '"stock":[^,]*'
+echo
+echo "Three portions existed. Count the 201s above, and read that number again."
+echo "Then look at the API log for what happened to the students who lost."
