@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# BUG-08 — two repos, two vocabularies.
+# BUG-08 — three files, two vocabularies.
 # Place an order, then read the raw status the API sends to the browser.
 #
 # Safe to run repeatedly: it frees the student's order slots and tops the
@@ -37,5 +37,7 @@ fi
 curl -s "$API/api/orders/$ORDER_ID/status"
 echo
 echo "Note the exact spelling of every status this API can produce"
-echo "(entity/OrderStatus.java), then find the strings campuscrave-web's"
-echo "StatusTimeline component switches on. Compare the lists. Slowly."
+echo "(entity/OrderStatus.java). Then read both of the browser's lists:"
+echo "  campuscrave-web/src/components/StatusTimeline.jsx"
+echo "  campuscrave-web/src/mocks/handlers.js"
+echo "Three files, two dialects. Compare them slowly."

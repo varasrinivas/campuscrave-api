@@ -1,5 +1,5 @@
 -- Lab mode seed: Anna Madam keeps the counter open late during exam week.
--- Loaded on top of data.sql by hints/lab-mode.sh — see that file for why.
+-- Loaded on top of data.sql by hints/lab-mode.sh and lab-mode.cmd — see either for why.
 --
 -- Why 05:29:59 and not 23:59: the cutoff check shifts the configured time before
 -- comparing it, and lab mode does not disable that shift — 23:59 landed on 18:29 and
