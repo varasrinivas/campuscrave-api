@@ -32,18 +32,8 @@ public class Wallet {
         return student;
     }
 
+    /** Money moves through WalletRepository.debit / credit — one guarded statement each. */
     public int getBalanceRupees() {
         return balanceRupees;
-    }
-
-    public void debit(int rupees) {
-        if (rupees > balanceRupees) {
-            throw new IllegalStateException("Wallet balance too low");
-        }
-        this.balanceRupees -= rupees;
-    }
-
-    public void credit(int rupees) {
-        this.balanceRupees += rupees;
     }
 }

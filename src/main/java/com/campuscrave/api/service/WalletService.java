@@ -26,25 +26,24 @@ public class WalletService {
 
     @Transactional
     public WalletDto topUp(Long studentId, int amountRupees) {
-        Wallet wallet = load(studentId);
+        load(studentId);
         payments.authorise(studentId, amountRupees);
-        wallet.credit(amountRupees);
-        walletRepository.save(wallet);
-        return new WalletDto(studentId, wallet.getBalanceRupees());
+        walletRepository.credit(studentId, amountRupees);
+        return new WalletDto(studentId, load(studentId).getBalanceRupees());
     }
 
     @Transactional
     public void debit(Long studentId, int amountRupees) {
-        Wallet wallet = load(studentId);
-        wallet.debit(amountRupees);
-        walletRepository.save(wallet);
+        load(studentId);
+        if (walletRepository.debit(studentId, amountRupees) == 0) {
+            throw new IllegalStateException("Wallet balance too low");
+        }
     }
 
     @Transactional
     public void refund(Long studentId, int amountRupees) {
-        Wallet wallet = load(studentId);
-        wallet.credit(amountRupees);
-        walletRepository.save(wallet);
+        load(studentId);
+        walletRepository.credit(studentId, amountRupees);
     }
 
     private Wallet load(Long studentId) {
